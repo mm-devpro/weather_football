@@ -7,9 +7,42 @@ local or ext
 win, lose, draw
 """
 from requests import request as r
+import re
 import pandas as pd
 from weather import Weather
 from utils.constants import W_URL, F_URL
+
+json_test = [{'fixture': {'id': 587176, 'referee': 'F. Zwayer', 'timezone': 'UTC', 'date': '2020-09-18T18:30:00+00:00',
+                          'timestamp': 1600453800, 'periods': {'first': 1600453800, 'second': 1600457400},
+                          'venue': {'id': 700, 'name': 'Allianz Arena', 'city': 'München'}, 'status'
+                          : {'long': 'Match Finished', 'short': 'FT', 'elapsed': 90}},
+              'league': {'id': 78, 'name': 'Bundesliga 1', 'country': 'Germany',
+                         'logo': 'https://media.api-sports.io/football/leagues/78.png',
+                         'flag': 'https://media.api-sports.io/flags/de.svg', 'season': 2020,
+                         'round': 'Regular Season - 1'}, 'teams': {
+        'home': {'id': 157, 'name': 'Bayern Munich', 'logo': 'https://media.api-sports.io/football/teams/157.png',
+                 'winner': True},
+        'away': {'id': 174, 'name': 'FC Schalke 04', 'logo': 'https://media.api-sports.io/football/teams/174.png',
+                 'winner': False}}, 'goals': {'home': 8, 'away': 0},
+              'score': {'halftime': {'home': 3, 'away': 0}, 'fulltime': {'home': 8, 'away': 0},
+                        'extratime': {'home': None, 'away': None}, 'penalty': {'home': None, 'away': None}}},
+             {'fixture': {'id': 587177, 'referee':
+                 'F. Brych', 'timezone': 'UTC', 'date': '2020-09-19T16:30:00+00:00', 'timestamp': 1600533000,
+                          'periods': {'first': 1600533000, 'second': 1600536600},
+                          'venue': {'id': 702, 'name': 'Signal-Iduna-Park', 'city': 'Dortmund'},
+                          'status': {'long': 'Match Finished', 'short': 'FT', 'elapsed': 90}},
+              'league': {'id': 78, 'name': 'Bundesliga 1', 'country': 'Germany',
+                         'logo': 'https://media.api-sports.io/football/leagues/78.png',
+                         'flag': 'https://media.api-sports.io/flags/de.svg', 'season': 2020,
+                         'round': 'Regular Season - 1'}, 'teams': {'home': {'id': 165, 'name': 'Borussia Dortmund',
+                                                                            'logo': 'https://media.api-sports.io/football/teams/165.png',
+                                                                            'winner': True}, 'away': {'id': 163,
+                                                                                                      'name': 'Borussia Monchengladbach',
+                                                                                                      'logo': 'https://media.api-sports.io/football/teams/163.png',
+                                                                                                      'winner': False}},
+              'goals': {'home': 3, 'away': 0},
+              'score': {'halftime': {'home': 1, 'away': 0}, 'fulltime': {'home': 3, 'away': 0},
+                        'extratime': {'home': None, 'away': None}, 'penalty': {'home': None, 'away': None}}}]
 
 params = {
     'lat': 48.1371,
@@ -33,15 +66,16 @@ res = fb.json()['response']
 
 """
 I need to keep :
-- fixture: id, date
-- venue: city
+- fixture: id, date, venue: city
 - teams: home: id, winner(false, true, null)
 - teams: away: id, winner
 - goals: home, away
 """
-dt = [{k: v for k, v in x.items() if k in ['fixture', 'goals', 'teams']} for x in res]
-dt_fixt = [{k: v for k, v in x['fixture'].items() if k in ['date', 'id']} for x in dt]
-dt_goals = [{k: v for k, v in x['fixture'].items() if k in ['date', 'id']} for x in dt]
-df2 = pd.DataFrame(dt[:2])
-# dt2 = [e['fixture'] for e in df2]
+dt = [{k: v for k, v in x.items() if k in ['fixture', 'goals', 'teams']} for x in json_test]
+dt_fixt = [{k: v for k, v in x['fixture'].items() if k in ['date', 'id', 'venue']} for x in dt]
+dt_goals = [{k: v for k, v in x['goals'].items()} for x in dt]
+dt_teams = [{k: v for k, v in x['teams'].items()} for x in dt]
 
+df2 = pd.json_normalize(json_test).filter(regex=('^teams|fixture.id|fixture.date|fixture.venue.city|goals.home|goals.away'))
+
+print(df2)
