@@ -12,6 +12,7 @@
 From football side are taken into consideration:  
 - whether the team is playing home or away
 - whether the team won, lost or drew
+- the number of goals and the goal difference
 
 With all the results, we will analyze if the weather can correlate with game results
 
