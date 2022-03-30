@@ -3,14 +3,20 @@ import pandas as pd
 
 class Team:
 
-    def __init__(self, fb_data):
-        self.fb_data = pd.json_normalize(fb_data)
+    def __init__(self, team_games, team_id):
+        self.team_games = team_games
+        self.team_id = team_id
 
-    def _get_results(self, loc="local", res="win"):
-        pass
+    def get_results(self):
+        home = pd.DataFrame(self.team_games[self.team_games.home_id == self.team_id],
+                                         columns=['date', 'home_id', 'home_winner', 'home_goals', 'goal_diff'])
 
-    def _get_goals(self):
-        pass
+        away = pd.DataFrame(self.team_games[self.team_games.away_id == self.team_id],
+                     columns=['date', 'home_id', 'away_winner', 'away_goals', 'goal_diff'])
+        return home, away
 
-    def _get_goal_diff(self):
-        pass
+
+"""
+-> chaque match :
+    si team est home/away, si elle a gagné/perdu/nul, nbre de buts et ecart de buts, date
+"""

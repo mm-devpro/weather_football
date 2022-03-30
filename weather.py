@@ -1,6 +1,7 @@
 import pandas as pd
 from utils.constants import W_ICONS, W_CONDITIONS
 
+
 class Weather:
     """
     Class Weather, to get daily infos and coeff
@@ -21,7 +22,8 @@ class Weather:
 
     def get_stats(self):
         weather_dt = self.wt_data[12:23]
-        weather_dt['condition'].value_counts()
+        wt = weather_dt['condition'].value_counts()
+        return wt
 
     def _set_coeff(self):
         weather_dt = self.wt_data[12:23]
@@ -42,7 +44,7 @@ class Weather:
         cloud_cover = weather_dt['cloud_cover'].mean() / 100
         humidity = weather_dt['relative_humidity'].mean() / 100
 
-        self.wtc_coeff = round((cloud_cover + humidity) / 2 , 4)
+        self.wtc_coeff = round((cloud_cover + humidity) / 2, 4)
 
         """
         TEMPERATURE RATE : between 0 and 1, relative to avg_temp, closer to 0 means low temp, closer to 1 means high temp
