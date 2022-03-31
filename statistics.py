@@ -104,7 +104,7 @@ headers = {
 }
 
 wt_response = r("GET", f'{W_URL}/weather', params=params)
-df = wt_response.json()['weather']
+df = pd.json_normalize(wt_response.json()['weather'])
 
 wo = Weather(df)
 #
@@ -120,25 +120,10 @@ I need to keep :
 - teams: away: id, winner
 - goals: home, away
 """
+df2 = pd.json_normalize(json_test)
+t = Team(df2, 157)
+team_results = t.get_results()
 
-df2 = pd.DataFrame(pd.json_normalize(json_test),
-                   columns=['fixture.id', 'fixture.date', 'fixture.venue.city', 'teams.home.id', 'teams.away.id',
-                            'teams.home.name', 'teams.away.name', 'teams.home.winner', 'teams.away.winner',
-                            'goals.home', 'goals.away'])
-df2.rename(columns={'fixture.id': 'fixture_id', 'fixture.date': 'date', 'fixture.venue.city': 'city',
-                    'teams.home.id': 'home_id', 'teams.away.id': 'away_id', 'teams.home.name': 'home_name',
-                    'teams.away.name': 'away_name', 'teams.home.winner': 'home_winner',
-                    'teams.away.winner': 'away_winner', 'goals.home': 'home_goals', 'goals.away': 'away_goals'},
-           inplace=True)
-
-# print(df2)
-df2['goal_diff'] = df2.home_goals - df2.away_goals
-
-munich = df2[(df2.home_name == 'Bayern Munich') | (df2.away_name == 'Bayern Munich')]
-
-t = Team(munich, 157)
-home, away = t.get_results()
-# print(f'[-] teams: \n {away}')
 
 """
 une equipe => home/away => wtc/wtb/temp => w/l/d
@@ -147,53 +132,49 @@ une equipe => home/away => wtc/wtb/temp => ecart goals
 """
 
 
-def get_result_stats():
+def get_team_weather_result_stats(fb_data, team_id):
     # 1 Team
     # dates pour le Weather
     # return graph
-    t = Team(munich, 157)
-    home, away = t.get_results()
+    t = Team(fb_data, team_id)
+    t_results = t.get_results()
+    t_results['wtc_coeff'] = np.nan
+    t_results['wtb_coeff'] = np.nan
+    t_results['temp_r'] = np.nan
 
-    for g in home.index:
-        city, lat, lon = TEAMS_IDS[home['home_id'][g]].values()
+    for g in t_results.index:
+        city, lat, lon = TEAMS_IDS[t_results['home_id'][g]].values()
         params = {
             'lat': lat,
             'lon': lon,
-            'date': home['date'][g].split('T')[0]
+            'date': t_results['date'][g].split('T')[0]
         }
         wt_response = r("GET", f'{W_URL}/weather', params=params)
-        df = wt_response.json()['weather']
-        w = Weather(df)
-        home['wtc_coeff'] = w.wtc_coeff
-        home['wtb_coeff'] = w.wtb_coeff
-        home['temp_r'] = w.temp_r
+        df3 = pd.json_normalize(wt_response.json()['weather'])
+        w = Weather(df3)
+        t_results.loc[g, 'wtc_coeff'] = w.wtc_coeff
+        t_results.loc[g, 'wtb_coeff'] = w.wtb_coeff
+        t_results.loc[g, 'temp_r'] = w.temp_r
 
-    for g in away.index:
-        city, lat, lon = TEAMS_IDS[away['home_id'][g]].values()
-        params = {
-            'lat': lat,
-            'lon': lon,
-            'date': away['date'][g].split('T')[0]
-        }
-        wt_response = r("GET", f'{W_URL}/weather', params=params)
-        df = wt_response.json()['weather']
-        w = Weather(df)
-        away['wtc_coeff'] = w.wtc_coeff
-        away['wtb_coeff'] = w.wtb_coeff
-        away['temp_r'] = w.temp_r
-
-    # print(away, home)
-    # TODO finish the function
-    pass
+    return t_results
 
 
-res_stats = get_result_stats()
-
-print(res_stats)
-
-def get_goal_stats():
-    pass
+def get_result_stats(fb_data, team_id):
+    t_results = get_team_weather_result_stats(fb_data, team_id)
+    print(f'[-] teams: \n {t_results}')
+    return pd.DataFrame(t_results, columns=['date', 'home_id', 'play', 'winner', 'wtc_coeff', 'wtb_coeff', 'temp_r'])
 
 
-def get_goal_diff_stats():
-    pass
+res_stats = get_result_stats(df2, 157)
+
+print(f"[-] results : \n {res_stats}")
+
+
+def get_goal_stats(fb_data, team_id):
+    t_goals = get_team_weather_result_stats(fb_data, team_id)
+    return pd.DataFrame(t_goals, columns=['date', 'home_id', 'play', 'goals', 'wtc_coeff', 'wtb_coeff', 'temp_r'])
+
+
+def get_goal_diff_stats(fb_data, team_id):
+    t_goal_diff = get_team_weather_result_stats(fb_data, team_id)
+    return pd.DataFrame(t_goal_diff, columns=['date', 'home_id', 'play', 'goal_diff', 'wtc_coeff', 'wtb_coeff', 'temp_r'])
