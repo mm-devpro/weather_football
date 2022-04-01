@@ -13,14 +13,13 @@ class Statistics:
         :param team_class: must be a team of type Team
         """
         self.team_class = team_class
-        self.full_stats = self._get_team_weather_result_stats()
+        self.full_stats = self._set_team_weather_result_stats()
 
-    def _get_team_weather_result_stats(self):
+    def _set_team_weather_result_stats(self):
         # 1 Team
         # dates pour le Weather
         # return graph
-        t = self.team_class
-        t_results = t.get_results()
+        t_results = self.team_class.get_results()
 
         t_results['wtc_coeff'] = np.nan
         t_results['wtb_coeff'] = np.nan
@@ -34,7 +33,8 @@ class Statistics:
                 'date': t_results.loc[g, 'date'].split('T')[0]
             }
             wt_response = r("GET", f'{W_URL}/weather', params=params)
-            df3 = pd.json_normalize(wt_response.json()['weather'])
+            res = wt_response.json()['weather']
+            df3 = pd.json_normalize(res)
             w = Weather(df3)
             t_results.loc[g, 'wtc_coeff'] = w.wtc_coeff
             t_results.loc[g, 'wtb_coeff'] = w.wtb_coeff

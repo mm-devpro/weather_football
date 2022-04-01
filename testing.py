@@ -83,10 +83,15 @@ json_test = [{'fixture': {'id': 587176, 'referee': 'F. Zwayer', 'timezone': 'UTC
               'score': {'halftime': {'home': 1, 'away': 0}, 'fulltime': {'home': 3, 'away': 0},
                         'extratime': {'home': None, 'away': None}, 'penalty': {'home': None, 'away': None}}}]
 
-params = {
+w_params = {
     'lat': 48.1371,
     'lon': 11.5753,
     'date': '2020-8-12'
+}
+f_params = {
+    'league': 78,
+    'season': 2020,
+    'team': 157
 }
 
 payload = {}
@@ -95,18 +100,19 @@ headers = {
     'x-rapidapi-host': 'v3.football.api-sports.io'
 }
 
-wt_response = r("GET", f'{W_URL}/weather', params=params)
-df = pd.json_normalize(wt_response.json()['weather'])
+wt_response = r("GET", f'{W_URL}/weather', params=w_params)
+
+res1 = wt_response.json()['weather']
+df = pd.json_normalize(res1)
 
 wo = Weather(df)
-#
-# print(f'[-] coeffs: \n {wo.wtc_coeff}, {wo.wtb_coeff}, {wo.temp_r}')
 
-fb = r("GET", f'{F_URL}/fixtures?league=78&season=2020', headers=headers, data=payload)
-res = fb.json()['response']
+print(f'[-] coeffs: \n {wo.wtc_coeff}, {wo.wtb_coeff}, {wo.temp_r}')
+
+fb = r("GET", f'{F_URL}/fixtures', params=f_params, headers=headers, data=payload)
+res2 = fb.json()['response']
 df2 = pd.json_normalize(json_test)
 t = Team(df2, 157)
-team_results = t.get_results()
 
 """
 une equipe => home/away => wtc/wtb/temp => w/l/d
@@ -116,6 +122,4 @@ une equipe => home/away => wtc/wtb/temp => ecart goals
 
 stats = Statistics(t)
 stats_res = stats.full_stats
-
-print(f'[-] goals: \n {stats_res}')
 
