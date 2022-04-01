@@ -7,11 +7,10 @@ local or ext
 win, lose, draw
 """
 from requests import request as r
-import re
 import pandas as pd
 import numpy as np
-from weather import Weather
-from football import Team
+from models.weather.weather import Weather
+from models.football.team import Team
 from utils.constants import W_URL, F_URL, TEAMS_IDS
 
 json_test = [{'fixture': {'id': 587176, 'referee': 'F. Zwayer', 'timezone': 'UTC', 'date': '2020-12-18T18:30:00+00:00',
@@ -65,10 +64,10 @@ json_test = [{'fixture': {'id': 587176, 'referee': 'F. Zwayer', 'timezone': 'UTC
                          'logo': 'https://media.api-sports.io/football/leagues/78.png',
                          'flag': 'https://media.api-sports.io/flags/de.svg', 'season': 2020,
                          'round': 'Regular Season - 1'}, 'teams': {
-                 'away': {'id': 157, 'name': 'FC Schalke 04',
+                 'home': {'id': 174, 'name': 'FC Schalke 04',
                           'logo': 'https://media.api-sports.io/football/teams/157.png',
                           'winner': True},
-                 'home': {'id': 174, 'name': 'Bayern Munich',
+                 'away': {'id': 157, 'name': 'Bayern Munich',
                           'logo': 'https://media.api-sports.io/football/teams/174.png',
                           'winner': False}}, 'goals': {'home': 0, 'away': 4},
               'score': {'halftime': {'home': 3, 'away': 0}, 'fulltime': {'home': 0, 'away': 4},
@@ -124,7 +123,6 @@ df2 = pd.json_normalize(json_test)
 t = Team(df2, 157)
 team_results = t.get_results()
 
-
 """
 une equipe => home/away => wtc/wtb/temp => w/l/d
 une equipe => home/away => wtc/wtb/temp => num goals
@@ -138,16 +136,17 @@ def get_team_weather_result_stats(fb_data, team_id):
     # return graph
     t = Team(fb_data, team_id)
     t_results = t.get_results()
+    print(f'[-] team : {t_results}')
     t_results['wtc_coeff'] = np.nan
     t_results['wtb_coeff'] = np.nan
     t_results['temp_r'] = np.nan
 
     for g in t_results.index:
-        city, lat, lon = TEAMS_IDS[t_results['home_id'][g]].values()
+        city, lat, lon = TEAMS_IDS[t_results.loc[g, 'home_id']].values()
         params = {
             'lat': lat,
             'lon': lon,
-            'date': t_results['date'][g].split('T')[0]
+            'date': t_results.loc[g, 'date'].split('T')[0]
         }
         wt_response = r("GET", f'{W_URL}/weather', params=params)
         df3 = pd.json_normalize(wt_response.json()['weather'])
@@ -161,13 +160,13 @@ def get_team_weather_result_stats(fb_data, team_id):
 
 def get_result_stats(fb_data, team_id):
     t_results = get_team_weather_result_stats(fb_data, team_id)
-    print(f'[-] teams: \n {t_results}')
+    # print(f'[-] teams: \n {t_results}')
     return pd.DataFrame(t_results, columns=['date', 'home_id', 'play', 'winner', 'wtc_coeff', 'wtb_coeff', 'temp_r'])
 
 
 res_stats = get_result_stats(df2, 157)
 
-print(f"[-] results : \n {res_stats}")
+# print(f"[-] results : \n {res_stats}")
 
 
 def get_goal_stats(fb_data, team_id):

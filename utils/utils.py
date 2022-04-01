@@ -19,7 +19,7 @@ def sanitize_fb_team_data(fb_data, team_id):
                         'teams.away.winner': 'away_winner', 'goals.home': 'home_goals', 'goals.away': 'away_goals'},
                inplace=True)
 
-    df['goal_diff'] = df.home_goals - df.away_goals
+    df['goal_diff'] = abs(df.home_goals - df.away_goals)
 
     team = df[(df.home_id == team_id) | (df.away_id == team_id)]
 

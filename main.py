@@ -5,9 +5,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from dotenv import load_dotenv
 from requests import request as r
-import pandas as pd
 
-from weather import Weather
+from models.weather.weather import Weather
 from utils.constants import W_URL, F_URL
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
