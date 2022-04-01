@@ -11,11 +11,11 @@ class Team:
     def get_results(self):
         # get all games, home or away in the same Dataframe
         home = pd.DataFrame(self.team_games[self.team_games.home_id == self.team_id],
-                            columns=['date', 'home_id', 'home_name', 'away_name', 'home_winner', 'home_goals',
+                            columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner', 'home_goals',
                                      'goal_diff'])
 
         away = pd.DataFrame(self.team_games[self.team_games.away_id == self.team_id],
-                            columns=['date', 'home_id', 'home_name', 'away_name', 'away_winner', 'away_goals',
+                            columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner', 'away_goals',
                                      'goal_diff'])
         # renaming the columns, to prepare for concatenation
         home.rename(columns={'home_winner': 'winner', 'home_goals': 'goals'}, inplace=True)
@@ -26,5 +26,6 @@ class Team:
         team_results = pd.concat([home, away])
         # sanitize date
         team_results['date'] = [x.split('T')[0] for x in team_results['date']]
+        team_results.sort_values(by='date', inplace=True, ascending=False)
 
         return team_results
