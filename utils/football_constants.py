@@ -1,7 +1,11 @@
 """
-FOOTBALL RELATED
+FOOTBALL RELATED CONSTANTS
 """
 F_URL = "https://v3.football.api-sports.io"
+F_HEADERS = {
+    'x-rapidapi-key': '6827e339753bf403ef08be29f1c08f14',
+    'x-rapidapi-host': 'v3.football.api-sports.io'
+}
 BUNDESLIGA_ID = 78
 TEAMS_IDS = {
     157: {
@@ -99,26 +103,4 @@ TEAMS_IDS = {
         'lat': "bla",
         'lon': "bla",
     },
-}
-
-"""
-WEATHER RELATED
-"""
-W_URL = "https://api.brightsky.dev"
-W_CONDITIONS = {
-    'dry': 0,
-    'rain': .3,
-    'sleet': .6,
-    'snow': 1,
-}
-W_ICONS = {
-    'clear-day': 0,
-    'clear-night': 0,
-    'partly-cloudy-day': .25,
-    'partly-cloudy-night': .25,
-    'cloudy': .5,
-    'wind': .5,
-    'rain': .75,
-    'sleet': 1,
-    'snow': 1,
 }

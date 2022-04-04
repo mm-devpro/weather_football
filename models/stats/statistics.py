@@ -1,43 +1,37 @@
 import pandas as pd
 import numpy as np
 from requests import request as r
-from utils.constants import TEAMS_IDS, W_URL
-from models.football.team import Team
-from models.weather.weather import Weather
+from utils.football_constants import TEAMS_IDS
+from utils.weather_constants import W_URL
+from models.football.team import get_team_ended_games
+from models.weather.weather import get_weather_coeffs
 
-class Statistics:
 
-    def __init__(self, team_class):
-        """
-        Class Statistics to get team games and related weather stats
-        :param team_class: must be a team of type Team
-        """
-        self.team_class = team_class
-        self.full_stats = self._set_team_weather_result_stats()
+def get_games_stats_for_a_team(team_id):
+    team_res = get_team_ended_games(team_id)
 
-    def _set_team_weather_result_stats(self):
-        # 1 Team
-        # dates pour le Weather
-        # return graph
-        t_results = self.team_class.get_results()
+    team_res['wtb_coeff'] = np.nan
+    team_res['w_icon'] = np.nan
+    team_res['wtc_coeff'] = np.nan
+    team_res['avg_temp'] = np.nan
+    team_res['temp_r'] = np.nan
 
-        t_results['wtc_coeff'] = np.nan
-        t_results['wtb_coeff'] = np.nan
-        t_results['temp_r'] = np.nan
+    for g in team_res.index:
+        city, lat, lon = TEAMS_IDS[team_res.loc[g, 'home_id']].values()
+        params = {
+            'lat': lat,
+            'lon': lon,
+            'date': team_res.loc[g, 'date'].split('T')[0]
+        }
+        wt_response = r("GET", f'{W_URL}/weather', params=params)
+        res = wt_response.json()['weather']
+        df = pd.json_normalize(res)
+        wtb_coeff, wtc_coeff, avg_temp, w_icon, temp_r = get_weather_coeffs(df)
+        team_res.loc[g, 'wtc_coeff'] = wtc_coeff
+        team_res.loc[g, 'w_icon'] = w_icon
+        team_res.loc[g, 'wtb_coeff'] = wtb_coeff
+        team_res.loc[g, 'avg_temp'] = avg_temp
+        team_res.loc[g, 'temp_r'] = temp_r
 
-        for g in t_results.index:
-            city, lat, lon = TEAMS_IDS[t_results.loc[g, 'home_id']].values()
-            params = {
-                'lat': lat,
-                'lon': lon,
-                'date': t_results.loc[g, 'date'].split('T')[0]
-            }
-            wt_response = r("GET", f'{W_URL}/weather', params=params)
-            res = wt_response.json()['weather']
-            df3 = pd.json_normalize(res)
-            w = Weather(df3)
-            t_results.loc[g, 'wtc_coeff'] = w.wtc_coeff
-            t_results.loc[g, 'wtb_coeff'] = w.wtb_coeff
-            t_results.loc[g, 'temp_r'] = w.temp_r
+    return team_res
 
-        return t_results

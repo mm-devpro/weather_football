@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from requests import request as r
 
 from models.weather.weather import Weather
-from utils.constants import W_URL, F_URL
+from utils.football_constants import W_URL, F_URL
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
