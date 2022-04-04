@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2f8fc4aa-6c06-471f-a1e2-ed4678683532" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/football/team.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/football/team.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/stats/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/stats/statistics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/weather/weather.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/weather/weather.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/football_constants.py" afterDir="false" />
-    </list>
+    <list default="true" id="2f8fc4aa-6c06-471f-a1e2-ed4678683532" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,6 +30,7 @@
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -86,7 +78,7 @@
       <workItem from="1648670589333" duration="11500000" />
       <workItem from="1648734102124" duration="7087000" />
       <workItem from="1648819262233" duration="6815000" />
-      <workItem from="1649071856426" duration="13050000" />
+      <workItem from="1649071856426" duration="13256000" />
     </task>
     <servers />
   </component>

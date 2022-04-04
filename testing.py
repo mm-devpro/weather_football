@@ -33,7 +33,7 @@ df = pd.json_normalize(res1)[12:23]
 
 t_we = df.groupby(df['icon']).size().idxmax()
 t_w = df['condition'].value_counts()
-print(f'[-] weather df : \n {t_we}')
+# print(f'[-] weather df : \n {t_we}')
 
 wtb_coeff, wtc_coeff, avg_temp, w_icon, temp_r = get_weather_coeffs(df)
 
