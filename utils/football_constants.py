@@ -111,3 +111,5 @@ TEAM_FIXTURE_RENAMED_COLS = {'fixture.id': 'fixture_id', 'fixture.date': 'date',
                         'teams.home.id': 'home_id', 'teams.away.id': 'away_id', 'teams.home.name': 'home_name',
                         'teams.away.name': 'away_name', 'teams.home.winner': 'home_winner',
                         'teams.away.winner': 'away_winner', 'goals.home': 'home_goals', 'goals.away': 'away_goals'}
+TEAM_INFOS_COLS = ['team.id', 'team.name', 'team.logo', 'venue.city']
+TEAM_INFOS_RENAMED_COLS = {'team.id': 'team_id', 'team.name': 'name', 'team.logo': 'logo', 'venue.city': 'city'}

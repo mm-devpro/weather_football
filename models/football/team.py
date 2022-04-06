@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 from requests import request as r
 from utils.utils import sanitize_data
-from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS
+from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, \
+    TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS
 
 
 def get_prev_year_team_rank(team_id):
@@ -78,9 +79,7 @@ def get_team_infos(team_id):
     else:
         res = f_team_data.json()['response']
 
-    df = pd.DataFrame(pd.json_normalize(res), columns=['team.id', 'team.name', 'team.logo', 'venue.city'])
-    df.rename(columns={'team.id': 'team_id', 'team.name': 'name', 'team.logo': 'logo', 'venue.city': 'city'},
-              inplace=True)
+    df = sanitize_data(pd.json_normalize(res), cols=TEAM_INFOS_COLS, renamed_cols=TEAM_INFOS_RENAMED_COLS)
     # data previous year rank
     df['prev_year_rank'] = get_prev_year_team_rank(team_id)
     df['avg_rank_o_years'] = get_average_team_rank(team_id)
@@ -103,9 +102,7 @@ def get_team_ended_games(team_id):
     f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
     res = f.json()['response']
     df = pd.json_normalize(res)
-    print(f'[-] df : \n {df}')
-    team_games = sanitize_data(df, cols=TEAM_FIXTURE_COLS, renamed_cols=TEAM_FIXTURE_RENAMED_COLS)
-    team_results = sanitize_fixtures_for_team(team_games, team_id)
+    team_results = sanitize_fixtures_for_team(df, team_id)
 
     return team_results
 
@@ -119,8 +116,9 @@ def get_team_next_game(team_id):
 
 
 def sanitize_fixtures_for_team(f_data, team_id):
-    f_data['goal_diff'] = abs(f_data.home_goals - f_data.away_goals)
-    team_data = f_data[(f_data.home_id == team_id) | (f_data.away_id == team_id)]
+    team_games = sanitize_data(f_data, cols=TEAM_FIXTURE_COLS, renamed_cols=TEAM_FIXTURE_RENAMED_COLS)
+    team_games['goal_diff'] = abs(team_games.home_goals - team_games.away_goals)
+    team_data = team_games[(team_games.home_id == team_id) | (team_games.away_id == team_id)]
     # get all games, home or away in the same Dataframe
     home = pd.DataFrame(team_data[team_data.home_id == team_id],
                         columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner',
