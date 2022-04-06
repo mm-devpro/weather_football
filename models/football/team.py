@@ -2,8 +2,8 @@ from datetime import date
 import pandas as pd
 import numpy as np
 from requests import request as r
-from utils.utils import sanitize_fb_team_data
-from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID
+from utils.utils import sanitize_data
+from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS
 
 
 def get_prev_year_team_rank(team_id):
@@ -14,10 +14,10 @@ def get_prev_year_team_rank(team_id):
     """
     curr_date = date.today()
     # get current season year which can be the previous one, as season starts in september
-    curr_y = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
+    curr_season_year = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
     rank_params = {
         'league': BUNDESLIGA_ID,
-        'season': int(curr_y) - 1,
+        'season': int(curr_season_year) - 1,
         'team': team_id
     }
 
@@ -93,23 +93,41 @@ def get_team_ended_games(team_id):
     :param team_id: Id of the team to retrieve
     :return: dataframe, Team game results
     """
-    curr_year = date.today().year
+    curr_date = date.today()
+    curr_season_year = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
     f_params = {
         'league': BUNDESLIGA_ID,
-        'season': curr_year,
+        'season': curr_season_year,
         'team': team_id
     }
     f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
     res = f.json()['response']
     df = pd.json_normalize(res)
-    team_games = sanitize_fb_team_data(df, team_id)
+    print(f'[-] df : \n {df}')
+    team_games = sanitize_data(df, cols=TEAM_FIXTURE_COLS, renamed_cols=TEAM_FIXTURE_RENAMED_COLS)
+    team_results = sanitize_fixtures_for_team(team_games, team_id)
+
+    return team_results
+
+
+def get_team_goals(team_id):
+    pass
+
+
+def get_team_next_game(team_id):
+    pass
+
+
+def sanitize_fixtures_for_team(f_data, team_id):
+    f_data['goal_diff'] = abs(f_data.home_goals - f_data.away_goals)
+    team_data = f_data[(f_data.home_id == team_id) | (f_data.away_id == team_id)]
     # get all games, home or away in the same Dataframe
-    home = pd.DataFrame(team_games[team_games.home_id == team_id],
+    home = pd.DataFrame(team_data[team_data.home_id == team_id],
                         columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner',
                                  'home_goals',
                                  'goal_diff'])
 
-    away = pd.DataFrame(team_games[team_games.away_id == team_id],
+    away = pd.DataFrame(team_data[team_data.away_id == team_id],
                         columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner',
                                  'away_goals',
                                  'goal_diff'])
@@ -125,11 +143,3 @@ def get_team_ended_games(team_id):
     team_results.sort_values(by='date', inplace=True, ascending=False)
 
     return team_results
-
-
-def get_team_goals(team_id):
-    pass
-
-
-def get_team_next_game(team_id):
-    pass

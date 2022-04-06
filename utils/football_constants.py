@@ -104,3 +104,10 @@ TEAMS_IDS = {
         'lon': "bla",
     },
 }
+TEAM_FIXTURE_COLS = ['fixture.id', 'fixture.date', 'fixture.venue.city', 'teams.home.id', 'teams.away.id',
+                     'teams.home.name', 'teams.away.name', 'teams.home.winner', 'teams.away.winner',
+                     'goals.home', 'goals.away']
+TEAM_FIXTURE_RENAMED_COLS = {'fixture.id': 'fixture_id', 'fixture.date': 'date', 'fixture.venue.city': 'city',
+                        'teams.home.id': 'home_id', 'teams.away.id': 'away_id', 'teams.home.name': 'home_name',
+                        'teams.away.name': 'away_name', 'teams.home.winner': 'home_winner',
+                        'teams.away.winner': 'away_winner', 'goals.home': 'home_goals', 'goals.away': 'away_goals'}

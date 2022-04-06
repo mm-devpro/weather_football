@@ -4,9 +4,9 @@ from requests import request as r
 import pandas as pd
 import numpy as np
 from models.weather.weather import get_weather_coeffs
-from models.football.team import get_team_infos, get_average_team_rank
-from models.stats.statistics import Statistics
-from utils.football_constants import W_URL, F_URL, TEAMS_IDS, BUNDESLIGA_ID, F_HEADERS
+from models.football.team import get_team_ended_games
+from utils.weather_constants import W_URL
+from utils.football_constants import F_URL, TEAMS_IDS, BUNDESLIGA_ID, F_HEADERS
 
 # football test file
 with open(os.path.join('./data_files/fb_data.json'), 'r') as json_file:
@@ -65,3 +65,7 @@ une equipe => home/away => wtc/wtb/temp => ecart goals
 # dp = get_team_infos(164)
 # get_average_team_rank(157)
 # print(dp)
+
+t_res = get_team_ended_games(157)
+
+print(t_res)
