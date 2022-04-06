@@ -75,7 +75,7 @@ def get_team_infos(team_id):
         f_team_data = r("GET", f'{F_URL}/teams', params=f_params, headers=F_HEADERS)
 
     except Exception as e:
-        print(f'Les parametres {f_params} ne correspondent pas')
+        print(f'Les parametres {f_params} ne correspondent pas, erreur: {e}')
     else:
         res = f_team_data.json()['response']
 
