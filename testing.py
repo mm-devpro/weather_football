@@ -4,7 +4,9 @@ from requests import request as r
 import pandas as pd
 import numpy as np
 from models.weather.weather import get_weather_coeffs
-from models.football.team import get_team_ended_games, get_team_infos
+from models.football.team import get_team_ended_games, get_team_infos, get_team_next_games
+from models.football.league import get_league_teams
+from models.stats.statistics import get_games_stats_for_a_team, get_results_graphs
 from utils.weather_constants import W_URL
 from utils.football_constants import F_URL, TEAMS_IDS, BUNDESLIGA_ID, F_HEADERS
 
@@ -66,6 +68,6 @@ une equipe => home/away => wtc/wtb/temp => ecart goals
 # get_average_team_rank(157)
 # print(dp)
 
-t_res = get_team_infos(157)
+fo_t = get_results_graphs(164)
 
-print(t_res)
+print(f'[-] teams : \n {fo_t}')

@@ -5,8 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2f8fc4aa-6c06-471f-a1e2-ed4678683532" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/football/team.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/football/team.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/stats/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/stats/statistics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/weather/weather.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/weather/weather.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/testing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/football_constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/football_constants.py" afterDir="false" />
     </list>
@@ -27,6 +30,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_MARK_IGNORED_FILES_AS_EXCLUDED" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />

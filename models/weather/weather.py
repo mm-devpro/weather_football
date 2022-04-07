@@ -27,6 +27,9 @@ def set_wtc_coeff(data):
     """
     cloud_cover = data['cloud_cover'].mean() / 100
     humidity = data['relative_humidity'].mean() / 100
+    # if there is no report of relative_humidity, we'll have only cloud_cover
+    if pd.isna(humidity):
+        humidity = cloud_cover
     wtc_coeff = round((cloud_cover + humidity) / 2, 4)
     return wtc_coeff
 

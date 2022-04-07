@@ -1,10 +1,15 @@
 from datetime import date
+import os
+import json
 import pandas as pd
 import numpy as np
 from requests import request as r
 from utils.utils import sanitize_data
 from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, \
     TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS
+
+with open(os.path.join('./data_files/fb_data.json'), 'r') as json_file:
+    json_test = json.load(json_file)
 
 
 def get_prev_year_team_rank(team_id):
@@ -36,9 +41,9 @@ def get_prev_year_team_rank(team_id):
 
 def get_average_team_rank(team_id):
     """
-        Get team avg rank starting from 2010
-        :param team_id: Id of the team to retrieve
-        :return: int, Team avg rank
+    Get team avg rank starting from 2010
+    :param team_id: Id of the team to retrieve
+    :return: int, Team avg rank
     """
     ranks = []
     curr_year = date.today().year
@@ -63,9 +68,9 @@ def get_average_team_rank(team_id):
 
 def get_team_infos(team_id):
     """
-        Get team main infos, including name, city, logo, last year position and average rank starting from 2010
-        :param team_id: Id of the team to retrieve
-        :return: dataframe, Team main infos
+    Get team main infos, including name, city, logo, last year position and average rank starting from 2010
+    :param team_id: Id of the team to retrieve
+    :return: dataframe, Team main infos
     """
     f_params = {
         'id': team_id
@@ -75,7 +80,10 @@ def get_team_infos(team_id):
         f_team_data = r("GET", f'{F_URL}/teams', params=f_params, headers=F_HEADERS)
 
     except Exception as e:
-        print(f'Les parametres {f_params} ne correspondent pas, erreur: {e}')
+        return {
+            error: 404,
+            message: f'Les parametres {f_params} ne correspondent pas, erreur: {e}'
+        }
     else:
         res = f_team_data.json()['response']
 
@@ -92,11 +100,23 @@ def get_team_ended_games(team_id):
     :param team_id: Id of the team to retrieve
     :return: dataframe, Team game results
     """
+    team_games = get_team_games(team_id)
+    curr_d = str(date.today())
+    team_games = team_games[team_games['date'] < curr_d]
+    return team_games
+
+
+def get_team_games(team_id):
+    """
+    Get all games of one team with results, goals, and goal difference for each of them
+    :param team_id: Id of the team to retrieve
+    :return: dataframe, Team game results
+    """
     curr_date = date.today()
     curr_season_year = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
     f_params = {
         'league': BUNDESLIGA_ID,
-        'season': curr_season_year,
+        'season': 2012,
         'team': team_id
     }
     f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
@@ -107,12 +127,16 @@ def get_team_ended_games(team_id):
     return team_results
 
 
-def get_team_goals(team_id):
-    pass
-
-
-def get_team_next_game(team_id):
-    pass
+def get_team_next_games(team_id):
+    """
+    Get next non-started games of one team (for the current season) with results, goals, and goal difference for each of them
+    :param team_id: Id of the team to retrieve
+    :return: dataframe, Team game results
+    """
+    team_games = get_team_games(team_id)
+    curr_d = str(date.today())
+    team_games = team_games[team_games['date'] >= curr_d]
+    return team_games
 
 
 def sanitize_fixtures_for_team(f_data, team_id):
@@ -136,8 +160,10 @@ def sanitize_fixtures_for_team(f_data, team_id):
     away['play'] = 'away'
     # concatenate home and away
     team_results = pd.concat([home, away])
+    team_results = team_results.replace({'winner': {True: 'w', False: 'l', None: 'd'}})
     # sanitize date
     team_results['date'] = [x.split('T')[0] for x in team_results['date']]
-    team_results.sort_values(by='date', inplace=True, ascending=False)
+    team_results.sort_values(by='date', inplace=True, ascending=False, ignore_index=True)
 
     return team_results
+
