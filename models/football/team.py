@@ -81,8 +81,8 @@ def get_team_infos(team_id):
 
     except Exception as e:
         return {
-            error: 404,
-            message: f'Les parametres {f_params} ne correspondent pas, erreur: {e}'
+            "error": 404,
+            "message": f'Les parametres {f_params} ne correspondent pas, erreur: {e}'
         }
     else:
         res = f_team_data.json()['response']
@@ -94,16 +94,35 @@ def get_team_infos(team_id):
     return df
 
 
-def get_team_ended_games(team_id):
+def get_team_ended_games(team_id, start=2021, end=2021):
     """
     Get all ended games of one team with results, goals, and goal difference for each of them
     :param team_id: Id of the team to retrieve
+    :param start: start date of season to retrieve
+    :param end: end date of season to retrieve
     :return: dataframe, Team game results
     """
-    team_games = get_team_games(team_id)
+    team_games = get_team_games_for_years(start, end, team_id)
     curr_d = str(date.today())
-    team_games = team_games[team_games['date'] < curr_d]
+    team_games = team_games[str(team_games['date']) < curr_d]
     return team_games
+
+
+def get_team_games_for_years(start, end, team_id):
+    team_total_res = pd.DataFrame([])
+    for n in range(start, end):
+        f_params = {
+            'league': BUNDESLIGA_ID,
+            'season': n,
+            'team': team_id
+        }
+        f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
+        res = f.json()['response']
+        df = pd.json_normalize(res)
+        team_total_res = pd.concat([team_total_res, sanitize_fixtures_for_team(df, team_id)])
+
+    return team_total_res
+
 
 
 def get_team_games(team_id):
@@ -116,7 +135,7 @@ def get_team_games(team_id):
     curr_season_year = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
     f_params = {
         'league': BUNDESLIGA_ID,
-        'season': 2012,
+        'season': curr_season_year,
         'team': team_id
     }
     f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)

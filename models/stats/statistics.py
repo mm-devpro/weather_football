@@ -8,8 +8,8 @@ from models.football.team import get_team_ended_games
 from models.weather.weather import get_weather_coeffs
 
 
-def get_games_stats_for_a_team(team_id):
-    team_res = get_team_ended_games(team_id)
+def get_games_stats_for_a_team(team_id, start, end):
+    team_res = get_team_ended_games(team_id, start, end)
 
     team_res['wtb_coeff'] = np.nan
     team_res['w_icon'] = np.nan
