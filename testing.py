@@ -4,11 +4,12 @@ from requests import request as r
 import pandas as pd
 import numpy as np
 from models.weather.weather import get_weather_coeffs
-from models.football.team import get_team_ended_games, get_team_infos, get_team_next_games, get_team_games_for_years
+from models.football.team import get_team_ended_games, get_team_infos, get_team_next_games, get_team_games_for_years, get_team_games
 from models.football.league import get_league_teams
 from models.stats.statistics import get_games_stats_for_a_team, get_results_graphs
 from utils.weather_constants import W_URL
 from utils.football_constants import F_URL, TEAMS_IDS, BUNDESLIGA_ID, F_HEADERS
+from models.football.games import get_all_fixtures
 
 # football test file
 with open(os.path.join('./data_files/fb_data.json'), 'r') as json_file:
@@ -33,7 +34,7 @@ wt_response = r("GET", f'{W_URL}/weather', params=w_params)
 res1 = wt_response.json()['weather']
 df = pd.json_normalize(res1)[12:23]
 
-print(f"[-] weather: \n {df}")
+# print(f"[-] weather: \n {df}")
 
 t_we = df.groupby(df['icon']).size().idxmax()
 t_w = df['condition'].value_counts()
@@ -70,6 +71,8 @@ une equipe => home/away => wtc/wtb/temp => ecart goals
 # get_average_team_rank(157)
 # print(dp)
 
-# fo_t = get_league_teams(BUNDESLIGA_ID, 2017)
+fo_t = get_all_fixtures()
 
-# print(f'[-] teams : \n {fo_t}')
+munich = get_team_games(fo_t, 157)
+
+print(f'[-] teams : \n {munich}')

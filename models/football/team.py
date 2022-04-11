@@ -4,9 +4,10 @@ import json
 import pandas as pd
 import numpy as np
 from requests import request as r
+from models.football.games import get_all_fixtures
 from utils.utils import sanitize_data
 from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, \
-    TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS
+    TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS, TEAMS_IDS
 
 with open(os.path.join('./data_files/fb_data.json'), 'r') as json_file:
     json_test = json.load(json_file)
@@ -17,6 +18,7 @@ def get_prev_year_team_rank(team_id):
     Get team rank of the previous year
     :param team_id: Id of the team to retrieve
     :return: Team rank or None if the team was not part of the league during the previous year
+    """
     """
     curr_date = date.today()
     # get current season year which can be the previous one, as season starts in september
@@ -35,6 +37,8 @@ def get_prev_year_team_rank(team_id):
             prev_rank = None
     except IndexError as e:
         prev_rank = None
+    """
+    prev_rank = TEAM_IDS['team_id']['prev_y_rank']
 
     return prev_rank
 
@@ -66,11 +70,13 @@ def get_average_team_rank(team_id):
     return avg
 
 
-def get_team_infos(team_id):
+def get_team_infos(fb_data, team_id):
     """
     Get team main infos, including name, city, logo, last year position and average rank starting from 2010
+    :param fb_data: team data from football api
     :param team_id: Id of the team to retrieve
     :return: dataframe, Team main infos
+    """
     """
     f_params = {
         'id': team_id
@@ -86,90 +92,57 @@ def get_team_infos(team_id):
         }
     else:
         res = f_team_data.json()['response']
-
-    df = sanitize_data(pd.json_normalize(res), cols=TEAM_INFOS_COLS, renamed_cols=TEAM_INFOS_RENAMED_COLS)
+    """
+    df = sanitize_data(pd.json_normalize(fb_data), cols=TEAM_INFOS_COLS, renamed_cols=TEAM_INFOS_RENAMED_COLS)
     # data previous year rank
     df['prev_year_rank'] = get_prev_year_team_rank(team_id)
     df['avg_rank_o_years'] = get_average_team_rank(team_id)
     return df
 
 
-def get_team_ended_games(team_id, start=2021, end=2021):
+def get_team_ended_games(fb_data, team_id):
     """
     Get all ended games of one team with results, goals, and goal difference for each of them
+    :param fb_data: fixture data from football api
     :param team_id: Id of the team to retrieve
-    :param start: start date of season to retrieve
-    :param end: end date of season to retrieve
     :return: dataframe, Team game results
     """
-    team_games = get_team_games_for_years(start, end, team_id)
+    team_games = get_team_games(fb_data, team_id)
     curr_d = str(date.today())
-    team_games = team_games[str(team_games['date']) < curr_d]
+    team_games = team_games[str(team_games.date) < curr_d]
     return team_games
 
 
-def get_team_games_for_years(start, end, team_id):
-    team_total_res = pd.DataFrame([])
-    for n in range(start, end):
-        f_params = {
-            'league': BUNDESLIGA_ID,
-            'season': n,
-            'team': team_id
-        }
-        f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
-        res = f.json()['response']
-        df = pd.json_normalize(res)
-        team_total_res = pd.concat([team_total_res, sanitize_fixtures_for_team(df, team_id)])
-
-    return team_total_res
-
-
-
-def get_team_games(team_id):
+def get_team_games_for_years(fb_data, team_id, start, end):
     """
-    Get all games of one team with results, goals, and goal difference for each of them
+    Get all games of one team between start and end dates
+    :param fb_data: fixture data from football api
     :param team_id: Id of the team to retrieve
+    :param start: start date
+    :param end: end date
     :return: dataframe, Team game results
     """
-    curr_date = date.today()
-    curr_season_year = curr_date.year if curr_date.month in range(8, 13) else (curr_date.year - 1)
-    f_params = {
-        'league': BUNDESLIGA_ID,
-        'season': curr_season_year,
-        'team': team_id
-    }
-    f = r("GET", f'{F_URL}/fixtures', params=f_params, headers=F_HEADERS)
-    res = f.json()['response']
-    df = pd.json_normalize(res)
-    team_results = sanitize_fixtures_for_team(df, team_id)
-
-    return team_results
-
-
-def get_team_next_games(team_id):
-    """
-    Get next non-started games of one team (for the current season) with results, goals, and goal difference for each of them
-    :param team_id: Id of the team to retrieve
-    :return: dataframe, Team game results
-    """
-    team_games = get_team_games(team_id)
-    curr_d = str(date.today())
-    team_games = team_games[team_games['date'] >= curr_d]
+    team_games = get_team_games(fb_data, team_id)
+    team_games = team_games[(start <= team_games.date) & (team_games.date < end)]
     return team_games
 
 
-def sanitize_fixtures_for_team(f_data, team_id):
-    team_games = sanitize_data(f_data, cols=TEAM_FIXTURE_COLS, renamed_cols=TEAM_FIXTURE_RENAMED_COLS)
-    team_games['goal_diff'] = abs(team_games.home_goals - team_games.away_goals)
-    team_data = team_games[(team_games.home_id == team_id) | (team_games.away_id == team_id)]
+def get_team_games(fb_data, team_id):
+    """
+    Get all games of one team with results, goals, and goal difference
+    :param fb_data: fixture data from football api
+    :param team_id: Id of the team to retrieve
+    :return: dataframe, Team game results
+    """
+    team_games = fb_data[(fb_data.home_id == team_id) | (fb_data.away_id == team_id)]
     # get all games, home or away in the same Dataframe
-    home = pd.DataFrame(team_data[team_data.home_id == team_id],
-                        columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner',
+    home = pd.DataFrame(team_games[team_games.home_id == team_id],
+                        columns=['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner',
                                  'home_goals',
                                  'goal_diff'])
 
-    away = pd.DataFrame(team_data[team_data.away_id == team_id],
-                        columns=['date', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner',
+    away = pd.DataFrame(team_games[team_games.away_id == team_id],
+                        columns=['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner',
                                  'away_goals',
                                  'goal_diff'])
     # renaming the columns, to prepare for concatenation
@@ -179,10 +152,19 @@ def sanitize_fixtures_for_team(f_data, team_id):
     away['play'] = 'away'
     # concatenate home and away
     team_results = pd.concat([home, away])
-    team_results = team_results.replace({'winner': {True: 'w', False: 'l', None: 'd'}})
-    # sanitize date
-    team_results['date'] = [x.split('T')[0] for x in team_results['date']]
-    team_results.sort_values(by='date', inplace=True, ascending=False, ignore_index=True)
-
     return team_results
+
+
+def get_team_next_games(fb_data, team_id):
+    """
+    Get next non-started games of one team (for the current season) with results, goals, and goal difference for each of them
+    :param fb_data: fixture data from football api
+    :param team_id: Id of the team to retrieve
+    :return: dataframe, Team game results
+    """
+    team_games = get_team_games(fb_data, team_id)
+    curr_d = str(date.today())
+    team_games = team_games[team_games.date >= curr_d]
+    return team_games
+
 
