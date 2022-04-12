@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import date
 from requests import request as r
-from utils.football_constants import TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, F_HEADERS, F_URL, BUNDESLIGA_ID, TEAMS_IDS
+from utils.football_constants import TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, F_HEADERS, F_URL, BUNDESLIGA_ID, TEAMS_IDS, HOME_TEAM_FIXTURES, AWAY_TEAM_FIXTURES
 from utils.utils import sanitize_data, convert_json_file_to_df
 
 """
@@ -70,7 +70,7 @@ def get_next_fixtures(fb_data, team_id=None):
     curr_d = str(date.today())
     games = fb_data
     if team_id is not None:
-        games = filter_team_fixtures(fb_data, team_id)
+        games = filter_team_fixtures(fb_data, team_id, HOME_TEAM_FIXTURES, AWAY_TEAM_FIXTURES)
     return games[games.date >= curr_d]
 
 
@@ -85,29 +85,27 @@ def get_fixtures_for_spec_years(fb_data, start_date, end_date, team_id=None):
     """
     games = fb_data
     if team_id is not None:
-        games = filter_team_fixtures(fb_data, team_id)
+        games = filter_team_fixtures(fb_data, team_id, HOME_TEAM_FIXTURES, AWAY_TEAM_FIXTURES)
     return games[(start_date <= games.date) & (games.date < end_date)]
 
 
-def filter_team_fixtures(fb_data, team_id):
+def filter_team_fixtures(fb_data, team_id, home_cols, away_cols):
     """
     Filter all games of one team out of the dataset
     :param fb_data: fixture data from football api
     :param team_id: Id of the team to retrieve
+    :param home_cols: columns of the home dataframe
+    :param away_cols: columns of the away dataframe
     :return: dataframe, Team game results
     """
     # mask over the full dataset of games
     team_games = fb_data[(fb_data.home_id == team_id) | (fb_data.away_id == team_id)]
     # get all games, home or away in the same Dataframe
     home = pd.DataFrame(team_games[team_games.home_id == team_id],
-                        columns=['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner',
-                                 'home_goals',
-                                 'goal_diff'])
+                        columns=home_cols)
 
     away = pd.DataFrame(team_games[team_games.away_id == team_id],
-                        columns=['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner',
-                                 'away_goals',
-                                 'goal_diff'])
+                        columns=away_cols)
     # renaming the columns, to prepare for concatenation
     home.rename(columns={'home_winner': 'winner', 'home_goals': 'goals'}, inplace=True)
     home['play'] = 'home'

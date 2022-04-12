@@ -7,8 +7,8 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import pandas as pd
 from requests import request as r
-from models.football.games import get_all_fixtures
-from models.football.team import get_team_infos
+from models.football.team_fixtures import get_all_fixtures
+from models.football.team_infos import get_team_infos
 from models.stats.statistics import get_game_stats_for_a_team
 from utils.football_constants import F_URL, BUNDESLIGA_ID
 from utils.weather_constants import W_URL

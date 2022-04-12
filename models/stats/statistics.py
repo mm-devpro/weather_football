@@ -3,14 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import date
 from requests import request as r
-from utils.football_constants import TEAMS_IDS
+from utils.football_constants import TEAMS_IDS, HOME_TEAM_FIXTURES_W_WEATHER, AWAY_TEAM_FIXTURES_W_WEATHER
 from utils.weather_constants import W_URL
 from utils.utils import convert_json_file_to_df
-from models.football.games import get_team_ended_games, get_team_fixtures, get_team_fixtures_from_json_data
+from models.football.team_fixtures import filter_team_fixtures, get_ended_fixtures
 from models.weather.weather import get_weather_coeffs
 
 
-def get_game_stats(fb_data):
+def get_fixture_stats(fb_data):
     """
     Get all the fixtures then add weather coeffs to get all stats
     :param fb_data: football data as pandas DataFrame
@@ -43,20 +43,19 @@ def get_game_stats(fb_data):
     return game_stats
 
 
-def get_fixtures_w_weather_for_a_team(fb_data, team_id):
+def filter_team_fixtures_w_weather(fb_data, team_id):
     """
     Get all the fixtures of one team then add weather coeffs to get all stats
     :param fb_data: football data as pandas DataFrame
     :param team_id: Id of the football team to retrieve
     :return: pandas DataFrame with all the weather corresponding datas for one team
     """
-    team_games = get_team_ended_games(fb_data, team_id)
-    team_game_stats = get_game_stats(team_games)
-    return team_game_stats
+    team_games = filter_team_fixtures(fb_data, team_id, HOME_TEAM_FIXTURES_W_WEATHER, AWAY_TEAM_FIXTURES_W_WEATHER)
+    return team_games
 
 
 def get_avg_coeffs_per_venue():
-    games = get_game_stats_from_json_data()
+    games = get_fixtures_stats_from_json_data()
     curr_d = str(date.today())
     games = games[games.date < curr_d]
     df = pd.DataFrame(games, columns=['home_id', 'city', 'wtb_coeff', 'wtc_coeff', 'w_icon', 'avg_temp', 'temp_r'])
@@ -70,13 +69,14 @@ def get_avg_coeffs_per_venue():
 
 
 def get_fixtures_stats_from_json_data():
-    fb_g_stats = convert_json_file_to_df('./data_files/fb_fixtures_w_weather.json')
-    return fb_g_stats
+    fb_data = convert_json_file_to_df('./data_files/fb_fixtures_w_weather.json')
+    return fb_data
 
 
-def get_team_fixtures_w_weather_from_json_data(team_id):
-    fb_f_stats = get_fixtures_stats_from_json_data()
-    return get_fixtures_w_weather_for_a_team(fb_f_stats, team_id)
+def filter_team_fixtures_w_weather_from_json_data(team_id):
+    fb_data = get_fixtures_stats_from_json_data()
+    team_fixtures_w_weather = filter_team_fixtures_w_weather(fb_data, team_id)
+    return team_fixtures_w_weather
 
 
 def get_team_ended_games_w_stats(team_id):
@@ -105,7 +105,7 @@ def get_team_next_games_w_weather(team_id):
 
 def get_results_coeffs_for_team(team_id):
     # data
-    team = get_team_ended_games_w_stats(team_id)
+    team = get_team_ended_fi_w_stats(team_id)
     team_res = pd.DataFrame(team.groupby(['play', 'winner']).median(), columns=['goals', 'goal_diff', 'wtb_coeff', 'wtc_coeff', 'avg_temp', 'temp_r'])
 
     return team_res

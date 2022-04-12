@@ -246,3 +246,12 @@ TEAM_INFOS_COLS = ['team.id', 'team.name', 'team.logo', 'venue.city']
 TEAM_INFOS_RENAMED_COLS = {'team.id': 'team_id', 'team.name': 'name', 'team.logo': 'logo', 'venue.city': 'city'}
 
 CURR_Y_TEAMS = [157, 159, 160, 161, 163, 164, 165, 167, 168, 169, 170, 172, 173, 176, 178, 182, 188, 192]
+
+HOME_TEAM_FIXTURES = ['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner', 'home_goals',
+                    'goal_diff']
+HOME_TEAM_FIXTURES_W_WEATHER = ['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'home_winner', 'home_goals',
+                    'goal_diff', 'wtb_coeff', 'w_icon', 'wtc_coeff', 'avg_temp', 'temp_r']
+AWAY_TEAM_FIXTURES = ['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner', 'away_goals',
+                    'goal_diff']
+AWAY_TEAM_FIXTURES_W_WEATHER = ['date', 'city', 'home_id', 'away_id', 'home_name', 'away_name', 'away_winner', 'away_goals',
+                    'goal_diff', 'wtb_coeff', 'w_icon', 'wtc_coeff', 'avg_temp', 'temp_r']

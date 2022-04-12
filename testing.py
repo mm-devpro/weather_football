@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-from models.stats.statistics import get_team_fixtures_w_weather_from_json_data
+from models.stats.statistics import filter_team_fixtures_w_weather_from_json_data
 
 # football fixtures json file
 # fb_f = get_all_fixtures_from_json_data()
@@ -14,8 +14,9 @@ from models.stats.statistics import get_team_fixtures_w_weather_from_json_data
 # print(f"[-] game stats: \n {fb_f_stats}")
 
 # get_results_graphs_for_team(157)
-stats = get_team_fixtures_w_weather_from_json_data(157)
+team_data = filter_team_fixtures_w_weather_from_json_data(157)
 
 
-print(f"[-] next games by team: \n {stats}")
+print(f"[-] team: \n {team_data}")
+# print(f"[-] coeffs: \n {team_coeffs}")
 
