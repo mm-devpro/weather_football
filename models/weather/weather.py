@@ -7,7 +7,7 @@ def set_wtb_coeff(data):
     WEATHER BEAUTY COEFF: between 0 and 1. Get closer to 0 if weather is very nice,
     and get closer to 1 when weather is very bad
     :param data: must be a pandas Dataframe with data from "https://api.brightsky.dev"
-    :return: weather beauty coeff
+    :return: weather beauty coeff and condition icon
     """
     weather_beauty = data.groupby([data['condition'], data['icon']]).size()
     res = [(W_CONDITIONS[col[0]] + W_ICONS[col[1]]) / 2 for col in weather_beauty.index]
@@ -39,7 +39,7 @@ def set_temp_rate(data):
     TEMPERATURE RATE : between 0 and 1, relative to avg_temp, closer to 0 means low temp, closer to 1 means high temp
     avg_temp in °C
     :param data: must be a pandas Dataframe with data from "https://api.brightsky.dev"
-    :return: temperature rate over the day
+    :return: average temperature and temperature rate over the day
     """
     avg_temp = data['temperature'].mean()
     temp_r = 0
