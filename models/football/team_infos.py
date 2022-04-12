@@ -1,12 +1,9 @@
 from datetime import date
-import os
-import json
 import pandas as pd
 import numpy as np
 from requests import request as r
 from utils.utils import sanitize_data
-from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_FIXTURE_COLS, TEAM_FIXTURE_RENAMED_COLS, \
-    TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS, TEAMS_IDS
+from utils.football_constants import F_HEADERS, F_URL, BUNDESLIGA_ID, TEAM_INFOS_COLS, TEAM_INFOS_RENAMED_COLS, TEAMS_IDS
 
 
 def get_prev_year_team_rank(team_id):
@@ -104,5 +101,5 @@ def get_prev_year_team_rank_from_consts(team_id):
     :param team_id: Id of the team to retrieve
     :return: Team rank or None if the team was not part of the league during the previous year
     """
-    return TEAM_IDS[team_id]['prev_y_rank']
+    return TEAMS_IDS[team_id]['prev_y_rank']
 

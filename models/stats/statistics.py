@@ -6,7 +6,7 @@ from requests import request as r
 from utils.football_constants import TEAMS_IDS, HOME_TEAM_FIXTURES_W_WEATHER, AWAY_TEAM_FIXTURES_W_WEATHER
 from utils.weather_constants import W_URL
 from utils.utils import convert_json_file_to_df
-from models.football.team_fixtures import filter_team_fixtures, get_ended_fixtures
+from models.football.team_fixtures import filter_team_fixtures
 from models.weather.weather import get_weather_coeffs
 
 
@@ -59,7 +59,7 @@ def get_avg_coeffs_per_venue():
     curr_d = str(date.today())
     games = games[games.date < curr_d]
     df = pd.DataFrame(games, columns=['home_id', 'city', 'wtb_coeff', 'wtc_coeff', 'w_icon', 'avg_temp', 'temp_r'])
-    df2 = df.groupby('city').mean()
+    df2 = df.groupby('city').median()
     return df2
 
 
@@ -79,25 +79,25 @@ def filter_team_fixtures_w_weather_from_json_data(team_id):
     return team_fixtures_w_weather
 
 
-def get_team_ended_games_w_stats(team_id):
+def get_team_ended_fixtures_w_weather(team_id):
     """
     Get all ended games of one team with results, goals, and goal difference for each of them
     :param team_id: ID of the team to retrieve
     :return: dataframe, Team game results
     """
-    team_games = get_team_fixtures_stats_from_json_data(team_id)
+    team_games = filter_team_fixtures_w_weather_from_json_data(team_id)
     curr_d = str(date.today())
     team_games = team_games[team_games.date < curr_d]
     return team_games
 
 
-def get_team_next_games_w_weather(team_id):
+def get_team_next_fixtures_w_weather(team_id):
     """
     Get all games to come of one team
     :param team_id: ID of the team to retrieve
     :return: dataframe, Team game results
     """
-    team_games = get_team_game_stats_from_json_data(team_id)
+    team_games = filter_team_fixtures_w_weather_from_json_data(team_id)
     curr_d = str(date.today())
     team_games = team_games[team_games.date >= curr_d]
     return team_games
@@ -105,7 +105,7 @@ def get_team_next_games_w_weather(team_id):
 
 def get_results_coeffs_for_team(team_id):
     # data
-    team = get_team_ended_fi_w_stats(team_id)
+    team = get_team_ended_fixtures_w_weather(team_id)
     team_res = pd.DataFrame(team.groupby(['play', 'winner']).median(), columns=['goals', 'goal_diff', 'wtb_coeff', 'wtc_coeff', 'avg_temp', 'temp_r'])
 
     return team_res

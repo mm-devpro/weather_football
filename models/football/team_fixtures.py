@@ -56,7 +56,7 @@ def get_ended_fixtures(fb_data, team_id=None):
     curr_d = str(date.today())
     games = fb_data
     if team_id is not None:
-        games = filter_team_fixtures(fb_data, team_id)
+        games = filter_team_fixtures(fb_data, team_id, home_cols=HOME_TEAM_FIXTURES, away_cols=AWAY_TEAM_FIXTURES)
     return games[games.date < curr_d]
 
 
@@ -123,7 +123,6 @@ def sanitize_fixtures(f_data):
     :return: sanitized DataFrame for football fixtures
     """
     games_data = sanitize_data(f_data, cols=TEAM_FIXTURE_COLS, renamed_cols=TEAM_FIXTURE_RENAMED_COLS)
-    games_data.rename(columns=TEAM_FIXTURE_RENAMED_COLS, inplace=True)
     games_data['goal_diff'] = abs(games_data.home_goals - games_data.away_goals)
     # renaming winner columns
     games_data = games_data.replace({
@@ -153,12 +152,3 @@ def get_all_fixtures_from_json_data():
     return fb_games
 
 
-def save_fixtures_to_json(league_id):
-    """
-    Create json data files from football api and weather api, for specific league.
-    :param league_id: ID of league to retrieve
-    """
-    df = get_all_fixtures(league_id)
-    df2 = get_game_stats(df)
-    df.to_json(r'./data_files/fb_fixtures.json', orient='index')
-    df2.to_json(r'./data_files/fb_fixtures_w_weather.json', orient='index')
