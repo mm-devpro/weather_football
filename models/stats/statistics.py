@@ -68,13 +68,13 @@ def get_avg_coeffs_per_venue():
 """
 
 
-def get_fixtures_stats_from_json_data():
+def get_fixtures_w_weather_from_json_data():
     fb_data = convert_json_file_to_df('./data_files/fb_fixtures_w_weather.json')
     return fb_data
 
 
 def filter_team_fixtures_w_weather_from_json_data(team_id):
-    fb_data = get_fixtures_stats_from_json_data()
+    fb_data = get_fixtures_w_weather_from_json_data()
     team_fixtures_w_weather = filter_team_fixtures_w_weather(fb_data, team_id)
     return team_fixtures_w_weather
 
@@ -104,11 +104,14 @@ def get_team_next_fixtures_w_weather(team_id):
 
 
 def get_results_coeffs_for_team(team_id):
-    # data
+    """
+    Get coeff median for a team
+    :param team_id: ID of team to retrieve
+    :return: avg (median) coeffs for a team, depending on it's play to be home or away
+    """
     team = get_team_ended_fixtures_w_weather(team_id)
-    team_res = pd.DataFrame(team.groupby(['play', 'winner']).median(), columns=['goals', 'goal_diff', 'wtb_coeff', 'wtc_coeff', 'avg_temp', 'temp_r'])
-
-    return team_res
+    team_coeffs = pd.DataFrame(team.groupby(['play', 'winner']).median(), columns=['goals', 'goal_diff', 'wtb_coeff', 'wtc_coeff', 'avg_temp', 'temp_r'])
+    return team_coeffs
 
     # plot
     # fig, axs = plt.subplots(2, 2)
