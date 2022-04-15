@@ -20,12 +20,11 @@ def get_all_fixtures(league_id):
     """
     curr_date = date.today()
     curr_year = curr_date.year
-    games_data = r("GET", f'{F_URL}/fixtures', params={'league': league_id, 'season': 2010}, headers=F_HEADERS)
+    games_data = r("GET", f'{F_URL}/fixtures', params={'league': league_id, 'season': 2012}, headers=F_HEADERS)
     games = games_data.json()['response']
     games = sanitize_fixtures(pd.json_normalize(games))
     all_games = games
-    for y in range(2011, curr_year):
-        print(f"[-] season years: \n {y}")
+    for y in range(2013, curr_year):
         fb_params = {
             'league': BUNDESLIGA_ID,
             'season': y,

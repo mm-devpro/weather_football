@@ -110,7 +110,7 @@ def get_result_coeffs_for_team(team_id):
     :return: avg (median) coeffs for a team, depending on it's play to be home or away
     """
     team = get_team_ended_fixtures_w_weather(team_id)
-    team_coeffs = pd.DataFrame(team.groupby(['play', 'winner']).agg({'goals': np.mean, 'goal_diff': np.mean, 'wtb_coeff': np.median, 'wtc_coeff': np.median, 'avg_temp': np.median}))
+    team_coeffs = pd.DataFrame(team.groupby(['play', 'winner']).mean(), columns=['goals', 'goal_diff', 'wtb_coeff', 'wtc_coeff', 'avg_temp'])
     return team_coeffs
 
     # plot
