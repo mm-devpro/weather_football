@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from models.stats.statistics import get_avg_coeffs_per_venue, get_results_coeffs_for_team
+from models.stats.statistics import get_avg_coeffs_per_venue, get_result_coeffs_for_team
 from models.football.team_fixtures import get_all_fixtures_from_json_data
 from models.stats.statistics import filter_team_fixtures_w_weather_from_json_data
 from utils.football_constants import BUNDESLIGA_ID, F_HEADERS, F_URL
@@ -13,11 +13,12 @@ def get_fixture_prediction(fixture):
     :return: fixture with added column "prediction" with draw/lose/win ratios
     """
     game = fixture
-    home_team_coeffs = get_results_coeffs_for_team(game.home_id).loc['home']
-    away_team_coeffs = get_results_coeffs_for_team(game.away_id).loc['away']
+    home_team_coeffs = get_result_coeffs_for_team(fixture.home_id).loc['home']
+    away_team_coeffs = get_result_coeffs_for_team(fixture.away_id).loc['away']
     h_mask = pd.DataFrame(home_team_coeffs, columns=['wtb_coeff', 'wtc_coeff', 'avg_temp'])
     a_mask = pd.DataFrame(away_team_coeffs, columns=['wtb_coeff', 'wtc_coeff', 'avg_temp'])
     game_coeffs = pd.Series(game, index=['wtb_coeff', 'wtc_coeff', 'avg_temp'])
+    # print(f"[-] home team 1: \n {home_team_coeffs}")
 
     # difference between game coeffs and home or away avg coeffs (absolute values)
     home_team_coeffs.loc[:, [col not in ['temp_r', 'goals', 'goal_diff'] for col in home_team_coeffs.columns]] = \
@@ -61,9 +62,9 @@ def get_fixture_prediction(fixture):
 
 
 def is_pred_true(f_data):
-    result = pd.DataFrame({}, index=['result', 'goals', 'goal_diff'], dtype='float64')
+    result = pd.Series({}, index=['result', 'goals', 'goal_diff'], dtype='float64')
     result['result'] = True if f_data.winner == f_data.prediction.name else False
     result['goals'] = True if f_data.goals == f_data.prediction.goals else False
     result['goal_diff'] = True if f_data.goal_diff == f_data.prediction.goal_diff else False
-    f_data['good_pred'] = result
+    f_data['pred_result'] = result
     return f_data
