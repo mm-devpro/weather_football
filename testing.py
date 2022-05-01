@@ -4,7 +4,8 @@ from requests import request as r
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from models.stats.statistics import filter_team_fixtures_w_weather_from_json_data
+from models.stats.statistics import filter_team_fixtures_w_weather_from_json_data, get_fixtures_w_weather_from_json_data
+from models.football.team_fixtures import get_all_fixtures_from_json_data, get_all_fixtures
 from models.predictions.predictions import get_fixture_prediction
 from utils.create_json_data import save_fixtures_to_json
 from utils.football_constants import BUNDESLIGA_ID
@@ -14,4 +15,9 @@ from utils.football_constants import BUNDESLIGA_ID
 # team_games = pd.DataFrame([get_fixture_prediction(f) for _, f in team_games[:6].T.items()])
 # print(team_games.winner, team_games.play)
 # print([t for t in team_games.prediction])
-save_fixtures_to_json(BUNDESLIGA_ID)
+# save_fixtures_to_json(BUNDESLIGA_ID)
+
+df = get_fixtures_w_weather_from_json_data()
+df.date = pd.to_datetime(df.date)
+df = df.set_index('date')
+print(df.head())

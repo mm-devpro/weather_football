@@ -42,6 +42,8 @@ def get_all_fixtures(league_id):
             all_games = pd.concat([all_games, games])
 
     all_games.sort_values(by='date', inplace=True, ascending=False, ignore_index=True)
+    all_games.date = pd.to_datetime(all_games.date)
+    all_games = all_games.set_index('date')
     return all_games
 
 
@@ -130,8 +132,11 @@ def sanitize_fixtures(f_data):
     })
     # sanitizing venue city column to avoid None
     games_data.city = np.where(games_data.city is None, games_data.city, TEAMS_IDS[games_data.home_id].loc['city'])
+    # games_data.fillna(TEAMS_IDS[games_data.home_id].loc['city'], columns='city')
     # sanitize date
     games_data['date'] = [x.split('T')[0] for x in games_data['date']]
+    games_data.date = pd.to_datetime(games_data.date)
+    games_data = games_data.set_index('date')
 
     return games_data
 
